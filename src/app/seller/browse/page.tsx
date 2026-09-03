@@ -15,13 +15,8 @@ import {
 } from "@/Components/Svg/SvgContainer2";
 import { ListPropertyBrowse, useGetProperties } from "@/Hooks/api/cms_api";
 import { BrowseDetailsSkeleton } from "@/Components/Skeleton/BrowseDetailsSkeleton";
-import {
-  APIProvider,
-  Map,
-  Marker,
-  InfoWindow,
-  useMap,
-} from "@vis.gl/react-google-maps";
+import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
+import PropertyMapPin from "@/Components/Map/PropertyMapPin";
 import { useMediaQuery } from "react-responsive";
 import { useRouter } from "next/navigation";
 import { usePropertyView } from "@/Hooks/api/post_api";
@@ -488,11 +483,7 @@ const SellerBrowsePage = () => {
   }
 
   const MapContent = ({ properties }: { properties: any[] }) => {
-    const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(
-      null,
-    );
     const map = useMap();
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
       if (!map || !properties || properties.length === 0) return;
@@ -505,15 +496,6 @@ const SellerBrowsePage = () => {
       map.fitBounds(bounds);
     }, [map, properties]);
 
-    const handleMouseEnter = (id: string) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setHoveredPropertyId(id);
-    };
-
-    const handleMouseLeave = () => {
-      timeoutRef.current = setTimeout(() => setHoveredPropertyId(null), 200);
-    };
-
     return (
       <Map
         style={{ width: "100%", height: "100%", borderRadius: "12px" }}
@@ -524,43 +506,11 @@ const SellerBrowsePage = () => {
         mapId={process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || "DEMO_MAP_ID"}
       >
         {properties?.map(item => (
-          <React.Fragment key={item._id}>
-            <Marker
-              position={{ lat: item.location.lat, lng: item.location.lng }}
-              onMouseOver={() => handleMouseEnter(item._id)}
-              onMouseOut={handleMouseLeave}
-            />
-            {hoveredPropertyId === item._id && (
-              <InfoWindow
-                position={{ lat: item.location.lat, lng: item.location.lng }}
-                pixelOffset={[0, -35]}
-                headerDisabled={true}
-              >
-                <Link href={`/seller/browse/${item._id}`}>
-                  <div
-                    className="p-1 cursor-pointer outline-none bg-white rounded-lg"
-                    onMouseEnter={() => handleMouseEnter(item._id)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <div className="relative w-[130px] h-[90px] mb-1">
-                      <Image
-                        src={item.media?.[0]?.url}
-                        alt={item.propertyName}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[#0085FF] font-bold text-sm">
-                        ${new Intl.NumberFormat().format(item.price)}
-                      </p>
-                      <p className="text-[10px] text-gray-500 truncate w-[120px]"></p>
-                    </div>
-                  </div>
-                </Link>
-              </InfoWindow>
-            )}
-          </React.Fragment>
+          <PropertyMapPin
+            key={item._id}
+            item={item}
+            href={`/seller/browse/${item._id}`}
+          />
         ))}
       </Map>
     );
