@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { FaBars, FaTimes } from "react-icons/fa";
 import Container from "@/Components/Common/Container";
 import { PlanetSvg } from "@/Components/Svg/SvgContainer";
@@ -12,10 +13,17 @@ type Lang = "English" | "Spanish";
 const STORAGE_KEY = "preferred_language";
 
 const Navbar = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState<Lang>("Spanish");
+
+  // Automatically close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+    setLangOpen(false);
+  }, [pathname]);
 
   // Restore saved language preference on mount
   useEffect(() => {
@@ -30,6 +38,18 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const languages: Lang[] = ["English", "Spanish"];
 
@@ -176,14 +196,14 @@ const Navbar = () => {
 
   const renderMobileLink = (item: any) =>
     item.type === "link-li" ? (
-      <Link key={item.label} href={item.href}>
+      <Link key={item.label} href={item.href} onClick={() => setIsOpen(false)}>
         <li className={item.liClassName}>{item.label}</li>
       </Link>
     ) : (
       <li key={item.label}>
         <Link
           href={item.href}
-          onClick={item.closeOnClick ? () => setIsOpen(false) : undefined}
+          onClick={() => setIsOpen(false)}
         >
           {item.label}
         </Link>
@@ -257,32 +277,50 @@ const Navbar = () => {
 
             <button
               onClick={() => setIsOpen(true)}
-              className="xl:hidden text-2xl"
+              className="xl:hidden text-2xl cursor-pointer"
             >
               <FaBars />
             </button>
           </div>
 
+          {/* Mobile Overlay with smooth fade & blur */}
           <div
-            className={`fixed top-0 left-0 h-full w-[260px] bg-white shadow-xl transform transition-transform ${
-              isOpen ? "translate-x-0" : "-translate-x-full"
-            } xl:hidden`}
-          >
-            <div className="flex justify-between px-6 py-5 border-b">
-              <Image
-                src="https://i.ibb.co.com/2YMddrBt/Group-1321314777.png"
-                alt="Terralink Logo"
-                width={160}
-                height={40}
-              />
-              <button onClick={() => setIsOpen(false)}>
-                <FaTimes />
-              </button>
-            </div>
+            className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 xl:hidden transition-all duration-300 ease-in-out ${
+              isOpen
+                ? "opacity-100 pointer-events-auto"
+                : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setIsOpen(false)}
+            aria-hidden={!isOpen}
+          />
 
-            <ul className="px-6 py-5 flex flex-col gap-3">
-              {config.mobileLinks.map(renderMobileLink)}
-            </ul>
+          {/* Mobile Menu Drawer with smooth slide */}
+          <div
+            className={`fixed top-0 left-0 h-full w-[280px] max-w-[85vw] bg-white shadow-2xl z-50 xl:hidden overflow-y-auto transform transition-transform duration-300 ease-in-out flex flex-col justify-between ${
+              isOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <Image
+                  src="https://i.ibb.co.com/2YMddrBt/Group-1321314777.png"
+                  alt="Terralink Logo"
+                  width={150}
+                  height={38}
+                />
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all text-gray-600 hover:text-black cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <FaTimes className="w-4 h-4" />
+                </button>
+              </div>
+
+              <ul className="px-6 py-5 flex flex-col gap-3">
+                {config.mobileLinks.map(renderMobileLink)}
+              </ul>
+            </div>
 
             <div className="px-6 mt-4">
               <button

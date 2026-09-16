@@ -11,19 +11,27 @@ import { useGetUserData } from "@/Hooks/api/auth_api";
 import { useGetConversations } from "@/Hooks/api/message.api";
 import { PlanetSvg } from "@/Components/Svg/SvgContainer";
 import { AngleBottomSvg } from "@/Components/Svg/SvgContainer2";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 
 const STORAGE_KEY = "preferred_language";
 
 const SellerNav = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const languages = ["English", "Spanish"];
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [activeLang, setActiveLang] = useState("Spanish");
+
+  // Automatically close mobile menu and dropdowns on route change
+  useEffect(() => {
+    setIsOpen(false);
+    setLangOpen(false);
+    setProfileOpen(false);
+  }, [pathname]);
 
   // Restore saved language preference on mount
   useEffect(() => {
@@ -45,6 +53,18 @@ const SellerNav = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -334,27 +354,42 @@ const SellerNav = () => {
 
             <button
               onClick={() => setIsOpen(true)}
-              className="xl:hidden text-2xl"
+              className="xl:hidden text-2xl cursor-pointer"
             >
               <FaBars />
             </button>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Overlay with smooth fade & blur */}
           <div
-            className={`fixed top-0 left-0 z-50 h-full w-[260px] bg-white shadow-xl transform transition-transform duration-300 ${
+            className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 xl:hidden transition-all duration-300 ease-in-out ${
+              isOpen
+                ? "opacity-100 pointer-events-auto"
+                : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setIsOpen(false)}
+            aria-hidden={!isOpen}
+          />
+
+          {/* Mobile Menu Drawer with smooth slide */}
+          <div
+            className={`fixed top-0 left-0 z-50 h-full w-[280px] max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
               isOpen ? "translate-x-0" : "-translate-x-full"
             } xl:hidden overflow-y-auto`}
           >
-            <div className="flex items-center justify-between px-6 py-5 border-b">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <Image
                 src="https://i.ibb.co.com/2YMddrBt/Group-1321314777.png"
                 alt="Terralink Logo"
-                width={160}
-                height={40}
+                width={150}
+                height={38}
               />
-              <button onClick={() => setIsOpen(false)} className="text-xl">
-                <FaTimes />
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all text-gray-600 hover:text-black cursor-pointer"
+                aria-label="Close menu"
+              >
+                <FaTimes className="w-4 h-4" />
               </button>
             </div>
 
@@ -369,11 +404,15 @@ const SellerNav = () => {
                   Browse Properties
                 </Link>
               </li>
-              <Link href={"/seller/pricing"}>
-                <li className="flex items-center gap-1 cursor-pointer">
+              <li>
+                <Link
+                  href="/seller/pricing"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-1 cursor-pointer"
+                >
                   Subscription Plans
-                </li>
-              </Link>
+                </Link>
+              </li>
               <li>
                 <Link href="/seller/about" onClick={() => setIsOpen(false)}>
                   About

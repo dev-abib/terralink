@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CiLinkedin } from "react-icons/ci";
 import { getItem } from "@/lib/localStorage";
@@ -130,17 +131,17 @@ const Footer = () => {
   const renderLinkList = (items: { label: string; href: string }[]) =>
     items.map(item => (
       <li key={item.label}>
-        <a
+        <Link
           href={item.href}
           className="hover:text-white transition-colors text-muted-gray xl:text-[20px] font-medium leading-[30px]"
         >
           {item.label}
-        </a>
+        </Link>
       </li>
     ));
 
   return (
-    <footer className="bg-[#0f0f0f] text-white overflow-hidden lg:mt-[150px] mt-15 xl:px-4">
+    <footer className="bg-[#0f0f0f] text-white overflow-hidden lg:mt-[150px] mt-12 sm:mt-16 xl:px-4">
       <Container>
         <div>
           <div className="py-5 xl:py-10 flex flex-col xl:flex-row gap-4 xl:gap-12">
