@@ -197,7 +197,7 @@ export default function BasicInfoStep({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-16 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:gap-16 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium mb-2">
             City <span className="text-red-500">*</span>

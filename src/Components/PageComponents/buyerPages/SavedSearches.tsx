@@ -54,7 +54,7 @@ const SavedSearches = () => {
           </div>
 
           <Link
-            href="#"
+            href="/buyerlayout/browse"
             className="bg-primary-blue text-white px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition text-center cursor-pointer"
           >
             Create New Search

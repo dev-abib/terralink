@@ -60,7 +60,7 @@ const Login = () => {
 
   return (
     <Container>
-      <div className="relative flex h-screen items-center justify-center gap-10 py-10">
+      <div className="relative flex min-h-screen items-center justify-center gap-10 py-8 lg:py-10">
           {showRoleModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">

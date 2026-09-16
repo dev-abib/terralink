@@ -27,7 +27,7 @@ const Community = ({ community }: CommunityProps) => {
               <h3 className="text-3xl lg:text-[38px] text-[#0085FF] font-semibold ">
                 {item.title}
               </h3>
-              <h4 className="text-[#404040] text-base lg:text-[20px] font-medium mt-2 text-nowrap capitalize">
+              <h4 className="text-[#404040] text-base lg:text-[20px] font-medium mt-2 capitalize">
                 {item.subTitle}
               </h4>
             </div>

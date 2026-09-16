@@ -308,7 +308,7 @@ const Featured = ({ data = [] }: PropertyProps) => {
             {/* Close Button (X) */}
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors p-2 cursor-pointer"
+              className="absolute top-2 right-2 sm:-top-10 sm:right-0 bg-black/60 sm:bg-transparent rounded-full sm:rounded-none text-white hover:text-gray-300 transition-colors p-2 cursor-pointer z-10"
               aria-label="Close modal"
             >
               <svg

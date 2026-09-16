@@ -111,7 +111,7 @@ export default function VerifyOTPClient() {
 
   return (
     <Container>
-      <div className="flex h-screen items-center justify-center gap-10 py-10">
+      <div className="flex min-h-screen items-center justify-center gap-10 py-8 lg:py-10">
         <div className="hidden lg:flex xl:w-[65%] lg:w-[50%] items-center justify-center h-full">
           <img
             src="https://i.ibb.co.com/7dPT0LX2/30ad3fc61803922fec84f5a2798ab18904d9635f.jpg"

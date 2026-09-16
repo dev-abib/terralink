@@ -11,10 +11,7 @@ const SellerPageHero = ({ hero }: heroprops) => {
 
   return (
     <section
-      className="w-full
-      
-      
-      overflow-hidden"
+      className="w-full bg-cover bg-center overflow-hidden"
       style={{
         backgroundImage: hero?.data?.bgImg
           ? `url(${hero?.data?.bgImg})`

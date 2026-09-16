@@ -50,7 +50,7 @@ const MessageModal = ({ isOpen, onClose, userId }: MessageModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center"
+      className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center px-4"
       onClick={onClose}
     >
       <div

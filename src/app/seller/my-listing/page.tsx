@@ -56,7 +56,7 @@ const MyListing = () => {
         </Link>
       </div>
 
-      <div className="mt-7.5">
+      <div className="mt-6 sm:mt-8">
         <div className="bg-[#F5F5F5] p-2 lg:p-10 rounded-[28px] flex flex-col gap-5">
           {items.length > 0 ? (
             items.map((item: any) => (
@@ -97,9 +97,11 @@ const MyListing = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-3 mt-5">
-                      <button className="flex items-center cursor-pointer gap-1 border border-[#E7E7E7] px-2.5 py-1 rounded-[12px] text-[#5F5F5F]">
-                        <BsEye className="text-lg" /> View Post
-                      </button>
+                      <Link href={`/seller/browse/${item._id}`}>
+                        <button className="flex items-center cursor-pointer gap-1 border border-[#E7E7E7] px-2.5 py-1 rounded-[12px] text-[#5F5F5F] hover:bg-gray-50 transition">
+                          <BsEye className="text-lg" /> View Post
+                        </button>
+                      </Link>
                       <Link href={`/seller/edit-listing/${item._id}`}>
                         <button className="flex items-center cursor-pointer gap-1 border border-[#E7E7E7] px-2.5 py-1 rounded-[12px] text-[#5F5F5F]">
                           <MdEdit className="text-lg" /> Edit

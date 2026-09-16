@@ -708,7 +708,7 @@ const BrowseDetails: React.FC<BrowswProps> = ({ data }) => {
               >
                 <button
                   onClick={() => setLightboxImage(null)}
-                  className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2 z-10"
+                  className="absolute top-2 right-2 sm:-top-12 sm:right-0 bg-black/60 sm:bg-transparent rounded-full sm:rounded-none text-white hover:text-gray-300 transition-colors p-2 z-10 cursor-pointer"
                   aria-label="Close modal"
                 >
                   <svg

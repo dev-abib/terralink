@@ -43,9 +43,9 @@ const ContactForm = () => {
   };
 
   return (
-    <section className="lg:pt-[150px] pt-15">
+    <section className="lg:pt-[150px] pt-12 sm:pt-16">
       <Container>
-        <div className="lg:flex gap-x-22">
+        <div className="lg:flex gap-10 lg:gap-16 xl:gap-20">
           <div className="w-full">
             <h3 className="xl:text-[24px] md:text-[20px] text-lg font-semibold text-[#404040]">
               Send Us a Message

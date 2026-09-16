@@ -7,7 +7,7 @@ const ContactHero = () => {
   const { data } = ConatctUs();
   return (
     <section
-      className="pt-30 lg:pb-[280px] pb-20 contacthero"
+      className="pt-28 sm:pt-32 lg:pt-36 lg:pb-[280px] pb-20 contacthero"
       style={{
         backgroundImage: data?.data?.bgImg
           ? `url(${data?.data?.bgImg})`

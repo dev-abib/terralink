@@ -3,7 +3,7 @@ import Container from "@/Components/Common/Container";
 
 const ContactHero = () => {
   return (
-    <section className="pt-30 lg:pb-[280px] pb-20 contacthero">
+    <section className="pt-28 sm:pt-32 lg:pt-36 lg:pb-[280px] pb-20 contacthero">
       <Container>
         <h2 className="text-center font-bold lg:text-[56px] md:text-[48px] text-[32px] text-white">
           Get in Touch
