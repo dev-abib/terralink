@@ -1,11 +1,34 @@
 "use client";
 import { CiSearch } from "react-icons/ci";
 import Container from "@/Components/Common/Container";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Location, Lookingfor } from "@/Components/Svg/SvgContainer";
 
 type TabType = "buy" | "rent";
+
+const departments = [
+  "Atlántida",
+  "Choluteca",
+  "Colón",
+  "Comayagua",
+  "Copán",
+  "Cortés",
+  "El Paraíso",
+  "Francisco Morazán",
+  "Gracias a Dios",
+  "Intibucá",
+  "Islas de la Bahía",
+  "La Paz",
+  "Lempira",
+  "Ocotepeque",
+  "Olancho",
+  "Santa Bárbara",
+  "Valle",
+  "Yoro",
+];
+
+const defaultPropertyTypes = ["House", "Apartment", "Land", "Commercial"];
 
 interface SearchFormData {
   lookingFor: string;
@@ -17,6 +40,7 @@ interface heroProps {
 
 const Hero: React.FC<heroProps> = ({ hero }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<TabType>("buy");
   const [formData, setFormData] = useState<SearchFormData>({
     lookingFor: "",
@@ -32,15 +56,24 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
     e.preventDefault();
 
     // Redirect to the browse page with the selected filters as query params.
-    // The browse page reads these and applies them the same way it applies
-    // its own in-page filters.
     const params = new URLSearchParams();
     params.set("type", activeTab);
-    if (formData.lookingFor) params.set("propertyType", formData.lookingFor);
-    if (formData.location) params.set("location", formData.location);
+    if (formData.lookingFor && formData.lookingFor !== "All") {
+      params.set("propertyType", formData.lookingFor);
+    }
+    if (formData.location) {
+      params.set("location", formData.location);
+    }
 
-    router.push(`/browse?${params.toString()}`);
+    const isBuyer = pathname?.startsWith("/buyerlayout");
+    const browsePath = isBuyer ? "/buyerlayout/browse" : "/browse";
+    router.push(`${browsePath}?${params.toString()}`);
   };
+
+  const propertyTypesList =
+    Array.isArray(hero?.propertyType) && hero.propertyType.length > 0
+      ? hero.propertyType
+      : defaultPropertyTypes;
 
   return (
     <section
@@ -111,9 +144,10 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
                     name="lookingFor"
                     value={formData.lookingFor}
                     onChange={handleChange}
-                    className="border border-[#DAE6E9] rounded-xl sm:rounded-2xl lg:rounded-[18px] pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 w-full appearance-none bg-white focus:outline-none focus:border-[#0085FF] text-sm sm:text-base"
+                    className="border border-[#DAE6E9] rounded-xl sm:rounded-2xl lg:rounded-[18px] pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 w-full appearance-none bg-white focus:outline-none focus:border-[#0085FF] text-sm sm:text-base cursor-pointer"
                   >
-                    {hero?.propertyType?.map((item: any) => (
+                    <option value="">All Types</option>
+                    {propertyTypesList.map((item: any) => (
                       <option key={item} value={item}>
                         {item}
                       </option>
@@ -133,27 +167,14 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    className="border border-[#DAE6E9] rounded-xl sm:rounded-2xl lg:rounded-[18px] pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 w-full appearance-none bg-white focus:outline-none focus:border-[#0085FF] text-sm sm:text-base"
+                    className="border border-[#DAE6E9] rounded-xl sm:rounded-2xl lg:rounded-[18px] pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 w-full appearance-none bg-white focus:outline-none focus:border-[#0085FF] text-sm sm:text-base cursor-pointer"
                   >
                     <option value="">Select a Location</option>
-                    <option value="atlantida">Atlántida</option>
-                    <option value="choluteca">Choluteca</option>
-                    <option value="colon">Colón</option>
-                    <option value="comayagua">Comayagua</option>
-                    <option value="copan">Copán</option>
-                    <option value="cortes">Cortés</option>
-                    <option value="elparaiso">El Paraíso</option>
-                    <option value="franciscomorazan">Francisco Morazán</option>
-                    <option value="graciasadios">Gracias a Dios</option>
-                    <option value="intibuca">Intibucá</option>
-                    <option value="islasdlabahia">Islas de la Bahía</option>
-                    <option value="lapaz">La Paz</option>
-                    <option value="lempira">Lempira</option>
-                    <option value="ocotepeque">Ocotepeque</option>
-                    <option value="olancho">Olancho</option>
-                    <option value="santabarbara">Santa Bárbara</option>
-                    <option value="valle">Valle</option>
-                    <option value="yoro">Yoro</option>
+                    {departments.map(dept => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                   <div className="absolute top-[34px] sm:top-11 lg:top-12 left-3 sm:left-4 pointer-events-none scale-90 sm:scale-100">
                     <Location />

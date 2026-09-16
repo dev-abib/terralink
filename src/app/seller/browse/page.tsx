@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { FaCheck } from "react-icons/fa";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import {
   AngleBottomSvg,
   SideBarCloseSvg,
@@ -18,7 +18,7 @@ import { BrowseDetailsSkeleton } from "@/Components/Skeleton/BrowseDetailsSkelet
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 import PropertyMapPin from "@/Components/Map/PropertyMapPin";
 import { useMediaQuery } from "react-responsive";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePropertyView } from "@/Hooks/api/post_api";
 
 // ─── Shared Filter Panel (Mobile) ───────────────────────────────────────────────
@@ -386,16 +386,202 @@ const HorizontalFilterBar = ({
   );
 };
 
+const departments = [
+  "Atlántida",
+  "Choluteca",
+  "Colón",
+  "Comayagua",
+  "Copán",
+  "Cortés",
+  "El Paraíso",
+  "Francisco Morazán",
+  "Gracias a Dios",
+  "Intibucá",
+  "Islas de la Bahía",
+  "La Paz",
+  "Lempira",
+  "Ocotepeque",
+  "Olancho",
+  "Santa Bárbara",
+  "Valle",
+  "Yoro",
+];
+
+const KNOWN_PROPERTY_TYPES = ["house", "apartment", "land", "commercial"];
+const KNOWN_LISTING_TYPES = ["buy", "rent", "for sale", "for rent"];
+
+const normalizeLocation = (loc: string | null | undefined): string | undefined => {
+  if (!loc) return undefined;
+  const clean = loc.trim();
+  if (!clean) return undefined;
+  const match = departments.find(
+    d =>
+      d
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") ===
+      clean
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""),
+  );
+  return match || clean;
+};
+
 // ─── Page ──────────────────────────────────────────────────────────────────────
-const SellerBrowsePage = () => {
+const SellerBrowseContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const parseFilters = () => {
+    const rawType = searchParams.get("type");
+    const rawListingType = searchParams.get("listingType");
+    const rawPropertyType = searchParams.get("propertyType");
+    const rawLocation = searchParams.get("location");
+    const rawMinPrice = searchParams.get("minPrice");
+    const rawMaxPrice = searchParams.get("maxPrice");
+    const rawMinBedrooms =
+      searchParams.get("minBedrooms") || searchParams.get("bedrooms");
+    const rawMinBathrooms =
+      searchParams.get("minBathrooms") || searchParams.get("bathrooms");
+    const rawSort = searchParams.get("sort");
+
+    let propType = rawPropertyType;
+    if (
+      !propType &&
+      rawType &&
+      KNOWN_PROPERTY_TYPES.includes(rawType.toLowerCase())
+    ) {
+      propType = rawType;
+    }
+
+    let listType = rawListingType;
+    if (
+      !listType &&
+      rawType &&
+      KNOWN_LISTING_TYPES.includes(rawType.toLowerCase())
+    ) {
+      listType = rawType;
+    }
+
+    let backendListingType: string | undefined = undefined;
+    if (listType) {
+      const lower = listType.toLowerCase();
+      if (lower === "rent" || lower === "for rent") {
+        backendListingType = "for rent";
+      } else if (lower === "buy" || lower === "for sale") {
+        backendListingType = "for sale";
+      }
+    }
+
+    const normLocation = normalizeLocation(rawLocation);
+
+    const filters: Record<string, any> = {
+      listingType: backendListingType,
+      propertyType:
+        !propType || propType.toLowerCase() === "all"
+          ? undefined
+          : propType.toLowerCase(),
+      minPrice: rawMinPrice || undefined,
+      maxPrice: rawMaxPrice || undefined,
+      location: normLocation || undefined,
+      minBedrooms: rawMinBedrooms ? Number(rawMinBedrooms) : undefined,
+      minBathrooms: rawMinBathrooms ? Number(rawMinBathrooms) : undefined,
+      page: 1,
+      limit: 10,
+      sort: rawSort || "newest",
+    };
+    return filters;
+  };
+
   const [open, setOpen] = useState(false);
   const { data: cta } = ListPropertyBrowse();
   const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState("Newest First");
   // State for full image modal
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [activeFilters, setActiveFilters] = useState<any>({});
+  const [activeFilters, setActiveFilters] = useState<any>(parseFilters);
+
+  const [listingType, setListingType] = useState<"buy" | "rent">("buy");
+  const [propertyType, setPropertyType] = useState("All");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [location, setLocation] = useState("");
+  const [bedrooms, setBedrooms] = useState<number | null>(null);
+  const [bathrooms, setBathrooms] = useState<number | null>(null);
+  const [selectedSort, setSelectedSort] = useState("Newest First");
+
+  useEffect(() => {
+    const rawType = searchParams.get("type");
+    const rawListingType = searchParams.get("listingType");
+    const rawPropertyType = searchParams.get("propertyType");
+    const rawLocation = searchParams.get("location");
+    const rawMinPrice = searchParams.get("minPrice");
+    const rawMaxPrice = searchParams.get("maxPrice");
+    const rawMinBedrooms =
+      searchParams.get("minBedrooms") || searchParams.get("bedrooms");
+    const rawMinBathrooms =
+      searchParams.get("minBathrooms") || searchParams.get("bathrooms");
+    const rawSort = searchParams.get("sort");
+
+    let propType = rawPropertyType;
+    if (
+      !propType &&
+      rawType &&
+      KNOWN_PROPERTY_TYPES.includes(rawType.toLowerCase())
+    ) {
+      propType = rawType;
+    }
+
+    let listType = rawListingType;
+    if (
+      !listType &&
+      rawType &&
+      KNOWN_LISTING_TYPES.includes(rawType.toLowerCase())
+    ) {
+      listType = rawType;
+    }
+
+    if (listType) {
+      const lower = listType.toLowerCase();
+      setListingType(lower === "rent" || lower === "for rent" ? "rent" : "buy");
+    } else {
+      setListingType("buy");
+    }
+
+    if (propType) {
+      setPropertyType(
+        propType.toLowerCase() === "all"
+          ? "All"
+          : propType.charAt(0).toUpperCase() + propType.slice(1),
+      );
+    } else {
+      setPropertyType("All");
+    }
+
+    const normLocation = normalizeLocation(rawLocation);
+    setLocation(normLocation || "");
+    setMinPrice(rawMinPrice || "");
+    setMaxPrice(rawMaxPrice || "");
+    setBedrooms(rawMinBedrooms ? Number(rawMinBedrooms) : null);
+    setBathrooms(rawMinBathrooms ? Number(rawMinBathrooms) : null);
+
+    if (rawSort) {
+      setSelectedSort(
+        rawSort === "price asc"
+          ? "Price: Low to High"
+          : rawSort === "price desc"
+            ? "Price: High to Low"
+            : rawSort === "most_popular"
+              ? "Most Popular"
+              : "Newest First",
+      );
+    }
+
+    setActiveFilters(parseFilters());
+  }, [searchParams]);
 
   // Handle Escape key and body scroll when modal is open
   useEffect(() => {
@@ -412,14 +598,6 @@ const SellerBrowsePage = () => {
     };
   }, [selectedImage]);
 
-  const [listingType, setListingType] = useState("buy");
-  const [propertyType, setPropertyType] = useState("All");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [location, setLocation] = useState("");
-  const [bedrooms, setBedrooms] = useState<number | null>(null);
-  const [bathrooms, setBathrooms] = useState<number | null>(null);
-  const [selectedSort, setSelectedSort] = useState("Newest First");
   const { data, isLoading } = useGetProperties(activeFilters);
   const propertyViewMutation = usePropertyView();
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -443,11 +621,17 @@ const SellerBrowsePage = () => {
 
   const handleSearch = () => {
     const filters: Record<string, any> = {
+      listingType:
+        listingType === "rent"
+          ? "for rent"
+          : listingType === "buy"
+            ? "for sale"
+            : undefined,
       propertyType:
         propertyType === "All" ? undefined : propertyType.toLowerCase(),
       minPrice: minPrice || undefined,
       maxPrice: maxPrice || undefined,
-      location: location || undefined,
+      location: location ? location.trim() : undefined,
       minBedrooms: bedrooms || undefined,
       minBathrooms: bathrooms || undefined,
       page: 1,
@@ -465,6 +649,22 @@ const SellerBrowsePage = () => {
     }
 
     setActiveFilters(filters);
+
+    const params = new URLSearchParams();
+    if (listingType) params.set("type", listingType);
+    if (filters.propertyType) params.set("propertyType", filters.propertyType);
+    if (filters.location) params.set("location", filters.location);
+    if (filters.minPrice) params.set("minPrice", filters.minPrice);
+    if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+    if (filters.minBedrooms)
+      params.set("minBedrooms", String(filters.minBedrooms));
+    if (filters.minBathrooms)
+      params.set("minBathrooms", String(filters.minBathrooms));
+    if (filters.sort && filters.sort !== "newest")
+      params.set("sort", filters.sort);
+
+    const qs = params.toString();
+    router.replace(qs ? `/seller/browse?${qs}` : "/seller/browse");
   };
 
   const displayedProperties = showAll
@@ -622,7 +822,7 @@ const SellerBrowsePage = () => {
         </div>
 
         {/* ── MOBILE: List/Map toggle + Collapsible Filter — Sticky on scroll ── */}
-        <div className="block lg:hidden sticky top-28 z-30 -mx-3 sm:-mx-4 md:-mx-6 mb-4 bg-white/95 backdrop-blur-sm px-3 sm:px-4 md:px-6 py-3 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)]">
+        <div className="block lg:hidden sticky top-20 z-30 -mx-3 sm:-mx-4 md:-mx-6 mb-4 bg-white/95 backdrop-blur-sm px-3 sm:px-4 md:px-6 py-3 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)]">
           <div className="flex bg-[#F3F3F4] p-1 rounded-xl mb-3">
             <button
               onClick={() => setViewMode("list")}
@@ -832,7 +1032,7 @@ const SellerBrowsePage = () => {
             {/* Close Button (X) */}
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors p-2 z-10 cursor-pointer"
+              className="absolute top-2 right-2 sm:-top-12 sm:right-0 bg-black/60 sm:bg-transparent rounded-full sm:rounded-none text-white hover:text-gray-300 transition-colors p-2 z-10 cursor-pointer"
               aria-label="Close modal"
             >
               <svg
@@ -899,6 +1099,15 @@ const SellerBrowsePage = () => {
         </div>
       </section>
     </>
+  );
+};
+
+// Wrapped in Suspense so useSearchParams can be used during prerendering
+const SellerBrowsePage = () => {
+  return (
+    <Suspense fallback={<BrowseDetailsSkeleton />}>
+      <SellerBrowseContent />
+    </Suspense>
   );
 };
 
