@@ -58,10 +58,18 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
     // Redirect to the browse page with the selected filters as query params.
     const params = new URLSearchParams();
     params.set("type", activeTab);
-    if (formData.lookingFor && formData.lookingFor !== "All") {
+    if (
+      formData.lookingFor &&
+      formData.lookingFor !== "All" &&
+      formData.lookingFor !== "All Types" &&
+      formData.lookingFor !== "Select Property Type"
+    ) {
       params.set("propertyType", formData.lookingFor);
     }
-    if (formData.location) {
+    if (
+      formData.location &&
+      formData.location !== "Select a Location"
+    ) {
       params.set("location", formData.location);
     }
 
@@ -70,9 +78,11 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
     router.push(`${browsePath}?${params.toString()}`);
   };
 
-  const propertyTypesList =
+  const propertyTypesList: string[] =
     Array.isArray(hero?.propertyType) && hero.propertyType.length > 0
       ? hero.propertyType
+      : typeof hero?.propertyType === "string" && hero.propertyType.trim()
+      ? [hero.propertyType.trim()]
       : defaultPropertyTypes;
 
   return (
@@ -146,7 +156,7 @@ const Hero: React.FC<heroProps> = ({ hero }) => {
                     onChange={handleChange}
                     className="border border-[#DAE6E9] rounded-xl sm:rounded-2xl lg:rounded-[18px] pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 w-full appearance-none bg-white focus:outline-none focus:border-[#0085FF] text-sm sm:text-base cursor-pointer"
                   >
-                    <option value="">All Types</option>
+                    <option value="">Select Property Type</option>
                     {propertyTypesList.map((item: any) => (
                       <option key={item} value={item}>
                         {item}
